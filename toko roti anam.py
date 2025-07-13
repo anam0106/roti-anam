@@ -1,55 +1,61 @@
-import streamlit as st
-from pulp import LpMaximize, LpProblem, LpVariable, lpSum, value
-import matplotlib.pyplot as plt
-import numpy as np
+# Data roti
+menu_roti = {
+    "Roti Coklat": 5000,
+    "Roti Keju": 6000,
+    "Roti Pisang": 5500,
+    "Roti Sosis": 7000,
+    "Roti Tawar": 4500
+}
 
-st.title("Aplikasi Optimasi Produksi (Linear Programming)")
+# Fungsi tampilkan menu
+def tampilkan_menu():
+    print("\n=== MENU Roti Toko Bahagia ===")
+    for i, (nama, harga) in enumerate(menu_roti.items(), start=1):
+        print(f"{i}. {nama} - Rp{harga:,}")
 
-st.markdown("### Input Data Produksi")
-num_products = st.number_input("Jumlah Produk", min_value=2, max_value=5, value=2)
+# Fungsi ambil pesanan
+def ambil_pesanan():
+    pesanan = {}
+    while True:
+        tampilkan_menu()
+        pilihan = input("Pilih roti (nama/ketik 'selesai' untuk selesai): ").title()
+        if pilihan.lower() == "selesai":
+            break
+        if pilihan in menu_roti:
+            jumlah = int(input(f"Jumlah {pilihan}: "))
+            if pilihan in pesanan:
+                pesanan[pilihan] += jumlah
+            else:
+                pesanan[pilihan] = jumlah
+        else:
+            print("Roti tidak tersedia.")
+    return pesanan
 
-profits = []
-for i in range(num_products):
-    profits.append(st.number_input(f"Keuntungan per unit produk x{i+1}", value=10.0))
+# Hitung total belanja
+def hitung_total(pesanan):
+    total = 0
+    for nama, jumlah in pesanan.items():
+        total += menu_roti[nama] * jumlah
+    return total
 
-num_constraints = st.number_input("Jumlah Batasan", min_value=1, max_value=3, value=2)
-constraints = []
-rhs = []
+# Cetak struk
+def cetak_struk(pesanan):
+    print("\n=== STRUK PEMBELIAN ===")
+    for nama, jumlah in pesanan.items():
+        harga = menu_roti[nama]
+        print(f"{nama} x{jumlah} = Rp{harga * jumlah:,}")
+    total = hitung_total(pesanan)
+    print(f"TOTAL = Rp{total:,}")
+    print("========================")
 
-st.markdown("### Input Batasan")
-for j in range(num_constraints):
-    st.markdown(f"Batasan {j+1}")
-    coefs = []
-    for i in range(num_products):
-        coefs.append(st.number_input(f"Koefisien x{i+1} (Batasan {j+1})", key=f"{i}_{j}", value=1.0))
-    constraints.append(coefs)
-    rhs.append(st.number_input(f"Nilai maksimum batasan {j+1}", value=100.0, key=f"rhs_{j}"))
+# Jalankan program
+def main():
+    print("Selamat datang di Toko Roti Bahagia!")
+    pesanan = ambil_pesanan()
+    if pesanan:
+        cetak_struk(pesanan)
+    else:
+        print("Tidak ada pesanan.")
 
-if st.button("Hitung Solusi Optimal"):
-    model = LpProblem("Optimasi_Produksi", LpMaximize)
-    x = [LpVariable(f"x{i+1}", lowBound=0) for i in range(num_products)]
-    model += lpSum([profits[i] * x[i] for i in range(num_products)]), "Total_Keuntungan"
-    for j in range(num_constraints):
-        model += lpSum([constraints[j][i] * x[i] for i in range(num_products)]) <= rhs[j]
-
-    model.solve()
-
-    st.success("Solusi ditemukan:")
-    for var in model.variables():
-        st.write(f"{var.name} = {var.value()}")
-    st.write(f"Total Keuntungan = {value(model.objective)}")
-
-    if num_products == 2:
-        # Visualisasi area feasible untuk 2 variabel
-        x_vals = np.linspace(0, max(rhs) + 10, 400)
-        plt.figure(figsize=(8, 6))
-        for j in range(num_constraints):
-            y_vals = [(rhs[j] - constraints[j][0]*x)/constraints[j][1] if constraints[j][1] != 0 else np.nan for x in x_vals]
-            plt.plot(x_vals, y_vals, label=f"Batasan {j+1}")
-        plt.xlabel("x1")
-        plt.ylabel("x2")
-        plt.xlim(left=0)
-        plt.ylim(bottom=0)
-        plt.title("Area Feasible")
-        plt.legend()
-        st.pyplot(plt.gcf())
+if __name__ == "__main__":
+    main()
