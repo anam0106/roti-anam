@@ -1,14 +1,3 @@
-import os
-import shutil
-
-# Buat ulang struktur direktori
-project_dir = "/mnt/data/optimasi-produksi"
-dirs = [project_dir, os.path.join(project_dir, "data")]
-for d in dirs:
-    os.makedirs(d, exist_ok=True)
-
-# Isi file main.py (Streamlit app)
-main_py = '''\
 import streamlit as st
 from pulp import LpMaximize, LpProblem, LpVariable, lpSum, value
 import matplotlib.pyplot as plt
@@ -64,29 +53,3 @@ if st.button("Hitung Solusi Optimal"):
         plt.title("Area Feasible")
         plt.legend()
         st.pyplot(plt.gcf())
-'''
-
-# Isi file requirements.txt
-requirements_txt = '''\
-streamlit
-pulp
-matplotlib
-numpy
-'''
-
-# Isi file README.md
-readme_md = '''\
-# Aplikasi Optimasi Produksi (Linear Programming)
-
-Aplikasi ini membantu memaksimalkan keuntungan dari produksi dua atau lebih produk berdasarkan batasan sumber daya (waktu, bahan baku, dll).
-
-## Fitur
-- Input jumlah produk dan batasan sumber daya
-- Visualisasi area feasible (untuk 2 variabel)
-- Output solusi optimal dan total keuntungan
-
-## Cara Menjalankan
-
-```bash
-pip install -r requirements.txt
-streamlit run main.py
