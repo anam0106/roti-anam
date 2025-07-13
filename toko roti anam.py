@@ -82,8 +82,6 @@ numpy
 # Isi file README.md
 # Aplikasi Optimasi Produksi (Linear Programming)
 
-Aplikasi ini membantu memaksimalkan keuntungan dari produksi dua atau lebih produk berdasarkan batasan sumber daya (waktu, bahan baku, dll).
-
 ## Fitur
 - Input jumlah produk dan batasan sumber daya
 - Visualisasi area feasible (untuk 2 variabel)
