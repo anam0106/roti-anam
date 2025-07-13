@@ -1,55 +1,65 @@
-import streamlit as st
-from pulp import LpMaximize, LpProblem, LpVariable, lpSum, value
-import matplotlib.pyplot as plt
-import numpy as np
+# Data produk supermarket
+produk = {
+    "Beras 5kg": 65000,
+    "Minyak Goreng 2L": 28000,
+    "Gula 1kg": 14000,
+    "Telur 1kg": 23000,
+    "Sabun Mandi": 5000,
+    "Shampoo": 12000
+}
 
-st.title("Aplikasi Optimasi Produksi (Linear Programming)")
+# Fungsi tampilkan produk
+def tampilkan_produk():
+    print("\n=== DAFTAR PRODUK SUPERMARKET ===")
+    for i, (nama, harga) in enumerate(produk.items(), 1):
+        print(f"{i}. {nama} - Rp{harga:,}")
 
-st.markdown("### Input Data Produksi")
-num_products = st.number_input("Jumlah Produk", min_value=2, max_value=5, value=2)
+# Fungsi ambil pesanan pelanggan
+def ambil_pesanan():
+    pesanan = {}
+    while True:
+        tampilkan_produk()
+        pilihan = input("Masukkan nama produk (atau ketik 'selesai' untuk checkout): ").title()
+        if pilihan.lower() == 'selesai':
+            break
+        elif pilihan in produk:
+            try:
+                jumlah = int(input(f"Jumlah {pilihan}: "))
+                if pilihan in pesanan:
+                    pesanan[pilihan] += jumlah
+                else:
+                    pesanan[pilihan] = jumlah
+            except ValueError:
+                print("Masukkan jumlah dalam angka!")
+        else:
+            print("Produk tidak tersedia.")
+    return pesanan
 
-profits = []
-for i in range(num_products):
-    profits.append(st.number_input(f"Keuntungan per unit produk x{i+1}", value=10.0))
+# Fungsi hitung total belanja
+def hitung_total(pesanan):
+    return sum(produk[nama] * jumlah for nama, jumlah in pesanan.items())
 
-num_constraints = st.number_input("Jumlah Batasan", min_value=1, max_value=3, value=2)
-constraints = []
-rhs = []
+# Fungsi cetak struk
+def cetak_struk(pesanan):
+    print("\n========= STRUK BELANJA =========")
+    for nama, jumlah in pesanan.items():
+        harga = produk[nama]
+        subtotal = harga * jumlah
+        print(f"{nama} x{jumlah} = Rp{subtotal:,}")
+    total = hitung_total(pesanan)
+    print("---------------------------------")
+    print(f"TOTAL BAYAR: Rp{total:,}")
+    print("Terima kasih telah berbelanja!")
+    print("=================================")
 
-st.markdown("### Input Batasan")
-for j in range(num_constraints):
-    st.markdown(f"Batasan {j+1}")
-    coefs = []
-    for i in range(num_products):
-        coefs.append(st.number_input(f"Koefisien x{i+1} (Batasan {j+1})", key=f"{i}_{j}", value=1.0))
-    constraints.append(coefs)
-    rhs.append(st.number_input(f"Nilai maksimum batasan {j+1}", value=100.0, key=f"rhs_{j}"))
+# Fungsi utama
+def main():
+    print("Selamat Datang di Supermarket Pintar!")
+    pesanan = ambil_pesanan()
+    if pesanan:
+        cetak_struk(pesanan)
+    else:
+        print("Tidak ada pembelian.")
 
-if st.button("Hitung Solusi Optimal"):
-    model = LpProblem("Optimasi_Produksi", LpMaximize)
-    x = [LpVariable(f"x{i+1}", lowBound=0) for i in range(num_products)]
-    model += lpSum([profits[i] * x[i] for i in range(num_products)]), "Total_Keuntungan"
-    for j in range(num_constraints):
-        model += lpSum([constraints[j][i] * x[i] for i in range(num_products)]) <= rhs[j]
-
-    model.solve()
-
-    st.success("Solusi ditemukan:")
-    for var in model.variables():
-        st.write(f"{var.name} = {var.value()}")
-    st.write(f"Total Keuntungan = {value(model.objective)}")
-
-    if num_products == 2:
-        # Visualisasi area feasible untuk 2 variabel
-        x_vals = np.linspace(0, max(rhs) + 10, 400)
-        plt.figure(figsize=(8, 6))
-        for j in range(num_constraints):
-            y_vals = [(rhs[j] - constraints[j][0]*x)/constraints[j][1] if constraints[j][1] != 0 else np.nan for x in x_vals]
-            plt.plot(x_vals, y_vals, label=f"Batasan {j+1}")
-        plt.xlabel("x1")
-        plt.ylabel("x2")
-        plt.xlim(left=0)
-        plt.ylim(bottom=0)
-        plt.title("Area Feasible")
-        plt.legend()
-        st.pyplot(plt.gcf())
+if __name__ == "__main__":
+    main()
