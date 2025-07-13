@@ -82,11 +82,6 @@ numpy
 # Isi file README.md
 # Aplikasi Optimasi Produksi (Linear Programming)
 
-## Fitur
-- Input jumlah produk dan batasan sumber daya
-- Visualisasi area feasible (untuk 2 variabel)
-- Output solusi optimal dan total keuntungan
-
 ## Cara Menjalankan
 
 ```bash
