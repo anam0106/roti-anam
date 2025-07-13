@@ -80,7 +80,6 @@ numpy
 '''
 
 # Isi file README.md
-readme_md = '''\
 # Aplikasi Optimasi Produksi (Linear Programming)
 
 Aplikasi ini membantu memaksimalkan keuntungan dari produksi dua atau lebih produk berdasarkan batasan sumber daya (waktu, bahan baku, dll).
